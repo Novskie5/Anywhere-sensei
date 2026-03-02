@@ -6,6 +6,7 @@
 
 using System.Collections;
 using Mediapipe.Tasks.Vision.FaceDetector;
+using Mediapipe.Tasks.Vision.FaceLandmarker;
 using UnityEngine;
 using UnityEngine.Rendering;
 using FaceDetectionResult = Mediapipe.Tasks.Components.Containers.DetectionResult;
@@ -15,7 +16,8 @@ namespace Mediapipe.Unity.Sample.FaceDetection
   public class FaceDetectorRunner : VisionTaskApiRunner<FaceDetector>
   {
     [SerializeField] private DetectionResultAnnotationController _detectionResultAnnotationController;
-
+    [SerializeField] private FaceLandmarkerResultAnnotationController _faceLandmarkerResultAnnotationController;
+    [SerializeField] private FaceSync _blinkSync; // BlinkSyncへの窓口を追加
     private Experimental.TextureFramePool _textureFramePool;
 
     public readonly FaceDetectionConfig config = new FaceDetectionConfig();
@@ -154,9 +156,34 @@ namespace Mediapipe.Unity.Sample.FaceDetection
       }
     }
 
-    private void OnFaceDetectionsOutput(FaceDetectionResult result, Image image, long timestamp)
-    {
-      _detectionResultAnnotationController.DrawLater(result);
-    }
+private void OnFaceDetectionsOutput(FaceDetectionResult result, Image image, long timestamp)
+{
+  _detectionResultAnnotationController.DrawLater(result);
+}
+
+private void OnFaceLandmarkDetectionOutput(FaceLandmarkerResult result, Image image, long timestamp)
+{
+  _faceLandmarkerResultAnnotationController.DrawLater(result);
+
+  // ここからカスタム
+  // アバターがセットされていて、かつ顔の表情データ（Blendshapes）が届いているかチェック
+  if (_blinkSync != null && result.faceBlendshapes != null && result.faceBlendshapes.Count > 0)
+  {
+      // 0番目の顔（1人目）の表情リストを取得
+      var categories = result.faceBlendshapes[0].categories;
+      float left = 0;
+      float right = 0;
+
+      // リストの中から「左目のまばたき」と「右目のまばたき」を探し出す
+      foreach (var category in categories)
+      {
+          if (category.categoryName == "eyeBlinkLeft") left = category.score;
+          if (category.categoryName == "eyeBlinkRight") right = category.score;
+      }
+
+      // 見つけた数値をアバターの FaceSync に送る！
+      _blinkSync.UpdateBlink(left, right);
+  }
+}
   }
 }

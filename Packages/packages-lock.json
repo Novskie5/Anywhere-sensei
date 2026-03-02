@@ -368,13 +368,13 @@
         "com.unity.mathematics": "1.2.6"
       }
     },
-    "com.vrmc.univrm": {
-      "version": "file:com.vrmc.univrm",
+    "com.vrmc.vrm": {
+      "version": "file:com.vrmc.vrm",
       "depth": 0,
       "source": "embedded",
       "dependencies": {
-        "com.vrmc.gltf": "0.131.0",
-        "com.unity.ugui": "1.0.0"
+        "com.unity.timeline": "1.7.6",
+        "com.vrmc.gltf": "0.131.0"
       }
     },
     "com.unity.modules.ai": {
