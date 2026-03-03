@@ -171,6 +171,9 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
       float rawJawOpen = 0, rawBrowInnerUp = 0;
       float rawBrowDownLeft = 0, rawBrowDownRight = 0;
       float rawEyeWideLeft = 0, rawEyeWideRight = 0;
+      float rawMouthPucker = 0; // 「う」や「お」に近い、口をすぼめる動き
+      float rawMouthFunnel = 0; // 「お」に近い、筒状にする動き
+      float rawMouthShrugUpper = 0; // 「え」のニュアンスに使える動き
 
       // MediaPipeのデータから数値を抽出
       foreach (var category in categories)
@@ -187,6 +190,9 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
           case "browDownRight":   rawBrowDownRight = category.score; break;
           case "eyeWideLeft":     rawEyeWideLeft = category.score; break;
           case "eyeWideRight":    rawEyeWideRight = category.score; break;
+          case "mouthPucker":     rawMouthPucker = category.score; break;
+          case "mouthFunnel":     rawMouthFunnel = category.score; break;
+          case "mouthShrugUpper": rawMouthShrugUpper = category.score; break;
         }
       }
 
@@ -202,11 +208,16 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
       right = Mathf.Clamp01(right * 1.8f);
 
       // 各種表情の計算
-      float smile = Mathf.Clamp01((rawSmileLeft + rawSmileRight) / 2f * 4.0f);
-      float browUp = rawBrowInnerUp < 0.7f ? 0 : rawBrowInnerUp;
-      float surprised = Mathf.Clamp01((browUp + (rawEyeWideLeft + rawEyeWideRight) / 2f) / 2f * 2.0f);
-      float angry = Mathf.Clamp01((rawBrowDownLeft + rawBrowDownRight) / 2f * 4.0f);
-      float mouth = rawJawOpen < 0.2f ? 0 : Mathf.Clamp01(rawJawOpen * 1.5f);
+      float smile = Mathf.Clamp01((rawSmileLeft + rawSmileRight) / 2f * 4.0f);//笑顔
+      float browUp = rawBrowInnerUp < 0.7f ? 0 : rawBrowInnerUp;//眉の位置
+      float surprised = Mathf.Clamp01((browUp + (rawEyeWideLeft + rawEyeWideRight) / 2f) / 2f * 2.0f);//驚き顔
+      float angry = Mathf.Clamp01((rawBrowDownLeft + rawBrowDownRight) / 2f * 4.0f);//怒り顔　実装が怪しいのでやる気がでたら調整
+      float mouth = rawJawOpen < 0.2f ? 0 : Mathf.Clamp01(rawJawOpen * 1.5f);//口の開き　笑顔のときは抑制
+      float aa = Mathf.Clamp01(rawJawOpen * 1.2f * (1.0f - rawMouthPucker));//「あ」の口の形　口をすぼめる動きで抑制
+      //float ii = smile;「い」の口の形　自動で笑顔になちゃうから後でロジック考えてくれ
+      float uu = Mathf.Clamp01(rawMouthPucker * 2.0f);//「う」の口の形　口をすぼめる動きで表現
+      float ee = Mathf.Clamp01(rawMouthShrugUpper * 1.5f);//「え」の口の形　上唇を上げる動きで表現
+      float oo = Mathf.Clamp01(rawMouthFunnel * 2.0f);// 「お」の口の形　口を筒状にする動きで表現
 
       // 笑顔による抑制を適用
       float blinkSuppression = smile > 0.5f ? 0f : 1.0f;
@@ -227,7 +238,7 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
               targetRotation = Quaternion.Euler(-euler.x, -euler.y, -euler.z);
       }
       // アバターへ反映
-      _faceSync.UpdateMouth(mouth);
+      _faceSync.UpdateMouth(aa, uu, ee, oo);//いを実装したときに引数にIhを追加してね
       _faceSync.UpdateBlink(left * blinkSuppression, right * blinkSuppression);
       _faceSync.UpdateExpression(smile, surprised, angry);
       _faceSync.UpdateRotation(targetRotation);

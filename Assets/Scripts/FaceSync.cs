@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UniVRM10;
 
@@ -5,7 +6,7 @@ public class FaceSync : MonoBehaviour
 {
     [SerializeField] private Vrm10Instance _instance;
     [SerializeField] private Transform _headBone; 
-
+    
     private Quaternion _targetRotation = Quaternion.identity;
 
     // メインスレッドでの実行 (Update)
@@ -23,11 +24,20 @@ public class FaceSync : MonoBehaviour
         _targetRotation = rotation;
     }
 
-    public void UpdateMouth(float jawOpen)
-    {
-        if (_instance == null) return;
-        _instance.Runtime.Expression.SetWeight(ExpressionKey.Aa, jawOpen);
-    }
+    public void UpdateMouth(float a,  float u, float e, float o)//いを実装したときに引数にfloat iを追加してね
+{
+    if (_instance == null) return;
+    
+    // VRM1.0のExpression管理クラスを取得
+    var expression = _instance.Runtime.Expression;
+
+    // それぞれの母音にウェイトを設定
+    expression.SetWeight(ExpressionKey.Aa, a);
+    //expression.SetWeight(ExpressionKey.Ih, i); いは笑顔になっちゃうから後でロジック考えてくれ
+    expression.SetWeight(ExpressionKey.Ou, u);
+    expression.SetWeight(ExpressionKey.Ee, e);
+    expression.SetWeight(ExpressionKey.Oh, o);
+}
 
     public void UpdateBlink(float left, float right)
     {

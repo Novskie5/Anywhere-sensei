@@ -13,7 +13,7 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
 {
   public class HandLandmarkerRunner : VisionTaskApiRunner<HandLandmarker>
   {
-    [SerializeField] private HandLandmarkerResultAnnotationController _handLandmarkerResultAnnotationController;
+    [SerializeField] private HandSync _handSync; // ← 追加！
 
     private Experimental.TextureFramePool _textureFramePool;
 
@@ -50,14 +50,9 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
         yield break;
       }
 
-      // Use RGBA32 as the input format.
-      // TODO: When using GpuBuffer, MediaPipe assumes that the input format is BGRA, so maybe the following code needs to be fixed.
       _textureFramePool = new Experimental.TextureFramePool(imageSource.textureWidth, imageSource.textureHeight, TextureFormat.RGBA32, 10);
 
-      // NOTE: The screen will be resized later, keeping the aspect ratio.
       screen.Initialize(imageSource);
-
-      SetupAnnotationController(_handLandmarkerResultAnnotationController, imageSource);
 
       var transformationOptions = imageSource.GetTransformationOptions();
       var flipHorizontally = transformationOptions.flipHorizontally;
@@ -69,7 +64,6 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
       var waitForEndOfFrame = new WaitForEndOfFrame();
       var result = HandLandmarkerResult.Alloc(options.numHands);
 
-      // NOTE: we can share the GL context of the render thread with MediaPipe (for now, only on Android)
       var canUseGpuImage = SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3 && GpuManager.GpuResources != null;
       using var glContext = canUseGpuImage ? GpuManager.GetGlContext() : null;
 
@@ -86,7 +80,6 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
           continue;
         }
 
-        // Build the input Image
         Image image;
         switch (config.ImageReadMode)
         {
@@ -97,8 +90,6 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
             }
             textureFrame.ReadTextureOnGPU(imageSource.GetCurrentTexture(), flipHorizontally, flipVertically);
             image = textureFrame.BuildGPUImage(glContext);
-            // TODO: Currently we wait here for one frame to make sure the texture is fully copied to the TextureFrame before sending it to MediaPipe.
-            // This usually works but is not guaranteed. Find a proper way to do this. See: https://github.com/homuler/MediaPipeUnityPlugin/pull/1311
             yield return waitForEndOfFrame;
             break;
           case ImageReadMode.CPU:
@@ -127,21 +118,13 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
           case Tasks.Vision.Core.RunningMode.IMAGE:
             if (taskApi.TryDetect(image, imageProcessingOptions, ref result))
             {
-              _handLandmarkerResultAnnotationController.DrawNow(result);
-            }
-            else
-            {
-              _handLandmarkerResultAnnotationController.DrawNow(default);
+              // AnnotationController不要につき何もしない
             }
             break;
           case Tasks.Vision.Core.RunningMode.VIDEO:
             if (taskApi.TryDetectForVideo(image, GetCurrentTimestampMillisec(), imageProcessingOptions, ref result))
             {
-              _handLandmarkerResultAnnotationController.DrawNow(result);
-            }
-            else
-            {
-              _handLandmarkerResultAnnotationController.DrawNow(default);
+              // AnnotationController不要につき何もしない
             }
             break;
           case Tasks.Vision.Core.RunningMode.LIVE_STREAM:
@@ -153,7 +136,48 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
 
     private void OnHandLandmarkDetectionOutput(HandLandmarkerResult result, Image image, long timestamp)
     {
-      _handLandmarkerResultAnnotationController.DrawLater(result);
+      // ガード節
+      if (_handSync == null) return;
+
+      // 手が1本も検出されなかったら両手をリセット
+      if (result.handLandmarks == null || result.handLandmarks.Count == 0)
+      {
+        _handSync.ResetHand(true);
+        _handSync.ResetHand(false);
+        return;
+      }
+
+      // 検出された手の数だけ処理（最大2本）
+      // handedness で左右を判定する
+      // MediaPipeの左右はミラー反転してるので注意（"Left" → 実際は右手）
+      bool leftDetected = false;
+      bool rightDetected = false;
+
+      for (int i = 0; i < result.handLandmarks.Count; i++)
+      {
+        // handedness が取れない場合はスキップ
+        if (result.handedness == null || result.handedness.Count <= i) continue;
+
+        var landmarks = result.handLandmarks[i].landmarks;
+
+        // MediaPipeの "Left" は実際にはカメラ越しの右手（ミラー）なので反転して解釈
+        bool isLeft = result.handedness[i].categories[0].categoryName == "Right";
+
+        _handSync.UpdateHand(isLeft, landmarks);
+
+        if (isLeft) leftDetected = true;
+        else rightDetected = true;
+      }
+
+      // 検出されなかった側はリセット
+      if (!leftDetected)  _handSync.ResetHand(true);
+      if (!rightDetected) _handSync.ResetHand(false);
+
+      // デバッグログ（100ms毎）
+      if (timestamp % 100 == 0)
+      {
+        Debug.Log($"[HandSync] 検出した手の数: {result.handLandmarks.Count}");
+      }
     }
   }
 }
