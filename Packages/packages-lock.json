@@ -9,6 +9,12 @@
         "com.unity.test-framework": "1.0.0"
       }
     },
+    "com.merry-yellow.code-assist": {
+      "version": "file:com.merry-yellow.code-assist",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.meta.xr.mrutilitykit": {
       "version": "85.0.0",
       "depth": 1,
@@ -355,6 +361,13 @@
         "com.unity.xr.legacyinputhelpers": "2.1.2"
       },
       "url": "https://packages.unity.com"
+    },
+    "com.veriorpies.parrelsync": {
+      "version": "https://github.com/VeriorPies/ParrelSync.git?path=/ParrelSync",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "610157ad762084380380148ba8ce14e266a6da97"
     },
     "com.vrmc.gltf": {
       "version": "file:com.vrmc.gltf",

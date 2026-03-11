@@ -15,6 +15,10 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
   {
     [SerializeField] private FaceLandmarkerResultAnnotationController _faceLandmarkerResultAnnotationController;
     [SerializeField] private FaceSync _faceSync;
+    public void SetFaceSync(FaceSync faceSync)
+    {
+    _faceSync = faceSync;
+    }
 
     private Experimental.TextureFramePool _textureFramePool;
 
@@ -160,10 +164,11 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
     {
       _faceLandmarkerResultAnnotationController.DrawLater(result);
 
-      // ガード節
+    
       if (_faceSync == null || result.faceBlendshapes == null || result.faceBlendshapes.Count == 0) return;
 
       var categories = result.faceBlendshapes[0].categories;
+      
 
       // 生の数値を初期化
       float rawLeft = 0, rawRight = 0;
@@ -219,7 +224,7 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
       float ee = Mathf.Clamp01(rawMouthShrugUpper * 1.5f);//「え」の口の形　上唇を上げる動きで表現
       float oo = Mathf.Clamp01(rawMouthFunnel * 2.0f);// 「お」の口の形　口を筒状にする動きで表現
 
-      // 笑顔による抑制を適用
+      // 笑顔のときまばたきで目がめり込むので抑制
       float blinkSuppression = smile > 0.5f ? 0f : 1.0f;
 
       // 頭の回転計算
