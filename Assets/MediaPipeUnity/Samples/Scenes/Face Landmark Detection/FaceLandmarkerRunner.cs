@@ -15,10 +15,8 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
   {
     [SerializeField] private FaceLandmarkerResultAnnotationController _faceLandmarkerResultAnnotationController;
     [SerializeField] private FaceSync _faceSync;
-    public void SetFaceSync(FaceSync faceSync)
-    {
-    _faceSync = faceSync;
-    }
+
+    public void SetFaceSync(FaceSync faceSync) => _faceSync = faceSync;
 
     private Experimental.TextureFramePool _textureFramePool;
 
@@ -33,18 +31,6 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
 
     protected override IEnumerator Run()
     {
-     /*
-      Debug.Log($"Delegate = {config.Delegate}");
-      Debug.Log($"Image Read Mode = {config.ImageReadMode}");
-      Debug.Log($"Running Mode = {config.RunningMode}");
-      Debug.Log($"NumFaces = {config.NumFaces}");
-      Debug.Log($"MinFaceDetectionConfidence = {config.MinFaceDetectionConfidence}");
-      Debug.Log($"MinFacePresenceConfidence = {config.MinFacePresenceConfidence}");
-      Debug.Log($"MinTrackingConfidence = {config.MinTrackingConfidence}");
-      Debug.Log($"OutputFaceBlendshapes = {config.OutputFaceBlendshapes}");
-      Debug.Log($"OutputFacialTransformationMatrixes = {config.OutputFacialTransformationMatrixes}");
-      */
-
       yield return AssetLoader.PrepareAssetAsync(config.ModelPath);
 
       var options = config.GetFaceLandmarkerOptions(config.RunningMode == Tasks.Vision.Core.RunningMode.LIVE_STREAM ? OnFaceLandmarkDetectionOutput : null);
@@ -164,11 +150,9 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
     {
       _faceLandmarkerResultAnnotationController.DrawLater(result);
 
-    
       if (_faceSync == null || result.faceBlendshapes == null || result.faceBlendshapes.Count == 0) return;
 
       var categories = result.faceBlendshapes[0].categories;
-      
 
       // 生の数値を初期化
       float rawLeft = 0, rawRight = 0;
@@ -217,7 +201,6 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
       float browUp = rawBrowInnerUp < 0.7f ? 0 : rawBrowInnerUp;//眉の位置
       float surprised = Mathf.Clamp01((browUp + (rawEyeWideLeft + rawEyeWideRight) / 2f) / 2f * 2.0f);//驚き顔
       float angry = Mathf.Clamp01((rawBrowDownLeft + rawBrowDownRight) / 2f * 4.0f);//怒り顔　実装が怪しいのでやる気がでたら調整
-      float mouth = rawJawOpen < 0.2f ? 0 : Mathf.Clamp01(rawJawOpen * 1.5f);//口の開き　笑顔のときは抑制
       float aa = Mathf.Clamp01(rawJawOpen * 1.2f * (1.0f - rawMouthPucker));//「あ」の口の形　口をすぼめる動きで抑制
       //float ii = smile;「い」の口の形　自動で笑顔になちゃうから後でロジック考えてくれ
       float uu = Mathf.Clamp01(rawMouthPucker * 2.0f);//「う」の口の形　口をすぼめる動きで表現
@@ -231,16 +214,16 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
       Quaternion targetRotation = Quaternion.identity; // デフォルトは正面
       if (result.facialTransformationMatrixes != null && result.facialTransformationMatrixes.Count > 0)
       {
-          var matrix = result.facialTransformationMatrixes[0];
-          Vector3 forward = new Vector3(matrix.m02, matrix.m12, matrix.m22);
-          Vector3 up = new Vector3(matrix.m01, matrix.m11, matrix.m21);
-          if (forward != Vector3.zero && up != Vector3.zero)
-          {
-              targetRotation = Quaternion.LookRotation(forward, up);
-          }
-          //使いやすくミラー状態に
-          Vector3 euler = targetRotation.eulerAngles;
-              targetRotation = Quaternion.Euler(-euler.x, -euler.y, -euler.z);
+        var matrix = result.facialTransformationMatrixes[0];
+        Vector3 forward = new Vector3(matrix.m02, matrix.m12, matrix.m22);
+        Vector3 up = new Vector3(matrix.m01, matrix.m11, matrix.m21);
+        if (forward != Vector3.zero && up != Vector3.zero)
+        {
+          targetRotation = Quaternion.LookRotation(forward, up);
+        }
+        //使いやすくミラー状態に
+        Vector3 euler = targetRotation.eulerAngles;
+        targetRotation = Quaternion.Euler(-euler.x, -euler.y, -euler.z);
       }
       // アバターへ反映
       _faceSync.UpdateMouth(aa, uu, ee, oo);//いを実装したときに引数にIhを追加してね

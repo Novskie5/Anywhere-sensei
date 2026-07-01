@@ -13,8 +13,6 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
 {
   public class PoseLandmarkerRunner : VisionTaskApiRunner<PoseLandmarker>
   {
-    [SerializeField] private PoseSync _poseSync; // ← 追加！
-
     private Experimental.TextureFramePool _textureFramePool;
 
     public readonly PoseLandmarkDetectionConfig config = new PoseLandmarkDetectionConfig();
@@ -118,24 +116,6 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
     private void OnPoseLandmarkDetectionOutput(PoseLandmarkerResult result, Image image, long timestamp)
     {
       DisposeAllMasks(result);
-
-      // ガード節
-      if (_poseSync == null) return;
-
-      // ポーズが検出されなかったらリセット
-      if (result.poseWorldLandmarks == null || result.poseWorldLandmarks.Count == 0)
-      {
-        _poseSync.ResetPose();
-        return;
-      }
-
-      // WorldLandmarks（メートル単位の3D座標）を使う
-      // NormalizedLandmarksより精度が高い
-      _poseSync.UpdatePose(result.poseWorldLandmarks[0].landmarks);
-
-      // デバッグログ（100ms毎）
-      if (timestamp % 100 == 0)
-        Debug.Log($"[PoseSync] ポーズ検出OK");
     }
 
     private void DisposeAllMasks(PoseLandmarkerResult result)

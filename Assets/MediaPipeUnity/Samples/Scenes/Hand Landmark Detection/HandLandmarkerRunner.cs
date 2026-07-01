@@ -13,8 +13,6 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
 {
   public class HandLandmarkerRunner : VisionTaskApiRunner<HandLandmarker>
   {
-    [SerializeField] private HandSync _handSync; // ← 追加！
-
     private Experimental.TextureFramePool _textureFramePool;
 
     public readonly HandLandmarkDetectionConfig config = new HandLandmarkDetectionConfig();
@@ -136,48 +134,7 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
 
     private void OnHandLandmarkDetectionOutput(HandLandmarkerResult result, Image image, long timestamp)
     {
-      // ガード節
-      if (_handSync == null) return;
-
-      // 手が1本も検出されなかったら両手をリセット
-      if (result.handLandmarks == null || result.handLandmarks.Count == 0)
-      {
-        _handSync.ResetHand(true);
-        _handSync.ResetHand(false);
-        return;
-      }
-
-      // 検出された手の数だけ処理（最大2本）
-      // handedness で左右を判定する
-      // MediaPipeの左右はミラー反転してるので注意（"Left" → 実際は右手）
-      bool leftDetected = false;
-      bool rightDetected = false;
-
-      for (int i = 0; i < result.handLandmarks.Count; i++)
-      {
-        // handedness が取れない場合はスキップ
-        if (result.handedness == null || result.handedness.Count <= i) continue;
-
-        var landmarks = result.handLandmarks[i].landmarks;
-
-        // MediaPipeの "Left" は実際にはカメラ越しの右手（ミラー）なので反転して解釈
-        bool isLeft = result.handedness[i].categories[0].categoryName == "Right";
-
-        _handSync.UpdateHand(isLeft, landmarks);
-
-        if (isLeft) leftDetected = true;
-        else rightDetected = true;
-      }
-
-      // 検出されなかった側はリセット
-      if (!leftDetected)  _handSync.ResetHand(true);
-      if (!rightDetected) _handSync.ResetHand(false);
-
-      // デバッグログ（100ms毎）
-      if (timestamp % 100 == 0)
-      {
-        Debug.Log($"[HandSync] 検出した手の数: {result.handLandmarks.Count}");
-      }
+      // AnnotationController不要につき何もしない
     }
   }
 }
