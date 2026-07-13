@@ -1,15 +1,26 @@
+using System;
 using UnityEngine;
 using UniVRM10;
 using Photon.Pun;
 
-public class FaceSync : MonoBehaviourPun, IPunObservable
+public class FaceSync : MonoBehaviourPun, IPunObservable, IPunInstantiateMagicCallback
 {
+    // AR視聴側などが「誰かのアバターがスポーンした」を検知するためのイベント
+    // 遅れて入室したクライアントでも、Photonが既存ネットワークオブジェクトを
+    // 再生成する際にOnPhotonInstantiateが呼ばれるので、参加タイミングに依存しない
+    public static event Action<FaceSync> OnAnySpawned;
+
+    public void OnPhotonInstantiate(PhotonMessageInfo info)
+    {
+        OnAnySpawned?.Invoke(this);
+    }
+
     [SerializeField] private Vrm10Instance _instance;
     [SerializeField] private Transform _headBone;
 
     private Quaternion _targetRotation = Quaternion.identity;
     private float _blinkL, _blinkR;
-    private float _aa, _uu, _ee, _oo; //あいうえお いを実装たときにfloat _iiも追加してね
+    private float _aa, _uu, _ee, _oo; //あいうえお いを実装したときにfloat _iiも追加する　いは笑顔になっちゃうので実装するかは未定
     private float _smile, _surprised, _angry;
     private Quaternion _syncRotation = Quaternion.identity;
 

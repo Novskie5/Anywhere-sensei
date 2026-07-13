@@ -16,6 +16,14 @@ public class PoseController : MonoBehaviourPun
     [SerializeField] private Transform _chest;
     private Quaternion _chestDefaultRot;
 
+    [Header("Breathing (chest必須、shoulderは任意)")]
+    [SerializeField] private float _breathSpeed = 0.25f;      // Perlinノイズを進める速さ
+    [SerializeField] private float _breathAmplitude = 2.5f;   // 度数、揺れの最大幅
+    [SerializeField] private Transform _shoulderL;
+    [SerializeField] private Transform _shoulderR;
+    private Quaternion _shoulderLDefaultRot;
+    private Quaternion _shoulderRDefaultRot;
+
     [SerializeField] private Transform _upperArmL;
     [SerializeField] private Transform _upperArmR;
     [SerializeField] private Transform _lowerArmL;
@@ -31,6 +39,10 @@ public class PoseController : MonoBehaviourPun
     {
         if (_chest != null)
             _chestDefaultRot = _chest.localRotation;
+        if (_shoulderL != null)
+            _shoulderLDefaultRot = _shoulderL.localRotation;
+        if (_shoulderR != null)
+            _shoulderRDefaultRot = _shoulderR.localRotation;
 
         if (_poses != null && _poses.Length > 0)
         {
@@ -40,9 +52,32 @@ public class PoseController : MonoBehaviourPun
 
     private void Update()
     {
-        if (_chest == null) return;
-        float breath = Mathf.Sin(Time.time * 1.2f) * 0.8f;
-        _chest.localRotation = _chestDefaultRot * Quaternion.Euler(breath, 0, 0);
+        UpdateBreathing();
+    }
+
+    // Sin波だけだと毎周期まったく同じ動きになるので、Perlinノイズで速さ・深さに揺らぎを持たせている
+    private void UpdateBreathing()
+    {
+        float t = Time.time * _breathSpeed;
+
+        if (_chest != null)
+        {
+            float noise = Mathf.PerlinNoise(t, 0f) - 0.5f; // -0.5〜0.5
+            float breath = noise * _breathAmplitude * 2f;
+            _chest.localRotation = _chestDefaultRot * Quaternion.Euler(breath, 0, 0);
+        }
+
+        // 肩は左右で違う種(seed)を使い、chestと同じ動きにならないようにしている
+        if (_shoulderL != null)
+        {
+            float noiseL = Mathf.PerlinNoise(t, 10f) - 0.5f;
+            _shoulderL.localRotation = _shoulderLDefaultRot * Quaternion.Euler(0, 0, noiseL * _breathAmplitude);
+        }
+        if (_shoulderR != null)
+        {
+            float noiseR = Mathf.PerlinNoise(t, 20f) - 0.5f;
+            _shoulderR.localRotation = _shoulderRDefaultRot * Quaternion.Euler(0, 0, -noiseR * _breathAmplitude);
+        }
     }
 
     // UIボタンのOnClick()から呼ぶ想定。自分のアバターのときだけ全員に同期する。

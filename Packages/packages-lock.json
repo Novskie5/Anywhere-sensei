@@ -9,12 +9,6 @@
         "com.unity.test-framework": "1.0.0"
       }
     },
-    "com.merry-yellow.code-assist": {
-      "version": "file:com.merry-yellow.code-assist",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "com.meta.xr.mrutilitykit": {
       "version": "85.0.0",
       "depth": 1,
@@ -130,7 +124,7 @@
     },
     "com.unity.editorcoroutines": {
       "version": "1.0.0",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
@@ -303,7 +297,7 @@
     },
     "com.unity.xr.arfoundation": {
       "version": "5.2.2",
-      "depth": 1,
+      "depth": 0,
       "source": "registry",
       "dependencies": {
         "com.unity.ugui": "1.0.0",

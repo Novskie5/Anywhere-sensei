@@ -31,6 +31,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_LoaderManagerInstance: {fileID: -6983856281491159868}
   m_InitManagerOnStart: 1
+--- !u!114 &-7215608587577566215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d236b7d11115f2143951f1e14045df39, type: 3}
+  m_Name: iPhone Settings
+  m_EditorClassIdentifier: 
+  m_LoaderManagerInstance: {fileID: -3960714068842213247}
+  m_InitManagerOnStart: 1
 --- !u!114 &-6983856281491159868
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -47,7 +61,7 @@ MonoBehaviour:
   m_AutomaticLoading: 0
   m_AutomaticRunning: 0
   m_Loaders:
-  - {fileID: 11400000, guid: c6fe67a0fa4a07e479e710d7ba604e3b, type: 2}
+  - {fileID: 11400000, guid: 5939f0c5094f16d43b9bfb6d9a9e843e, type: 2}
 --- !u!114 &-4220719098204571270
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -62,6 +76,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_LoaderManagerInstance: {fileID: -8658669689104227989}
   m_InitManagerOnStart: 1
+--- !u!114 &-3960714068842213247
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4c3631f5e58749a59194e0cf6baf6d5, type: 3}
+  m_Name: iPhone Providers
+  m_EditorClassIdentifier: 
+  m_RequiresSettingsUpdate: 0
+  m_AutomaticLoading: 0
+  m_AutomaticRunning: 0
+  m_Loaders: []
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74,11 +104,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2dc886499c26824283350fa532d087d, type: 3}
   m_Name: XRGeneralSettingsPerBuildTarget
   m_EditorClassIdentifier: 
-  Keys: 010000000700000024000000
+  Keys: 01000000070000002400000004000000
   Values:
   - {fileID: -4220719098204571270}
   - {fileID: -7232019604434674128}
   - {fileID: 6930506821586824767}
+  - {fileID: -7215608587577566215}
 --- !u!114 &2574950172523751626
 MonoBehaviour:
   m_ObjectHideFlags: 0
