@@ -22,7 +22,6 @@ public class FaceSync : MonoBehaviourPun, IPunObservable, IPunInstantiateMagicCa
     private float _blinkL, _blinkR;
     private float _aa, _uu, _ee, _oo; //あいうえお いを実装したときにfloat _iiも追加する　いは笑顔になっちゃうので実装するかは未定
     private float _smile, _surprised, _angry;
-    private Quaternion _syncRotation = Quaternion.identity;
 
     private bool _isMine;
 
@@ -39,20 +38,20 @@ public class FaceSync : MonoBehaviourPun, IPunObservable, IPunInstantiateMagicCa
             stream.SendNext(_smile);
             stream.SendNext(_surprised);
             stream.SendNext(_angry);
-            stream.SendNext(_syncRotation);
+            stream.SendNext(_targetRotation);
         }
         else // 相手→受信
         {
-            _blinkL       = (float)stream.ReceiveNext();
-            _blinkR       = (float)stream.ReceiveNext();
-            _aa           = (float)stream.ReceiveNext();
-            _uu           = (float)stream.ReceiveNext();
-            _ee           = (float)stream.ReceiveNext();
-            _oo           = (float)stream.ReceiveNext();
-            _smile        = (float)stream.ReceiveNext();
-            _surprised    = (float)stream.ReceiveNext();
-            _angry        = (float)stream.ReceiveNext();
-            _syncRotation = (Quaternion)stream.ReceiveNext();
+            _blinkL        = (float)stream.ReceiveNext();
+            _blinkR        = (float)stream.ReceiveNext();
+            _aa            = (float)stream.ReceiveNext();
+            _uu            = (float)stream.ReceiveNext();
+            _ee            = (float)stream.ReceiveNext();
+            _oo            = (float)stream.ReceiveNext();
+            _smile         = (float)stream.ReceiveNext();
+            _surprised     = (float)stream.ReceiveNext();
+            _angry         = (float)stream.ReceiveNext();
+            _targetRotation = (Quaternion)stream.ReceiveNext();
         }
     }
 

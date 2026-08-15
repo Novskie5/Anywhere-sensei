@@ -12,9 +12,6 @@ public static class RoomPropertyKeys
 
 public class NetworkManager : MonoBehaviourPunCallbacks
 {
-    // 自分のアバターのPoseController（UIボタンから呼び出す用）
-    private PoseController _localPoseController;
-
     private void Start()
     {
         PhotonNetwork.ConnectUsingSettings(); // サーバーに繋ぐ
@@ -31,6 +28,8 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         Debug.Log("部屋に入った！");
+        // 先生は自分のトラッキング確認用カメラに写る位置(原点)に固定で出す
+        // (ずらすのは生徒側のアバターだけでよい。StudentARManager.cs参照)
         GameObject avatar = PhotonNetwork.Instantiate("VRM1.0TestAv", Vector3.zero, Quaternion.identity);
 
         // 自分がトラッキングを持つ「先生」であることをroomに宣言する
@@ -46,17 +45,6 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         if (runner != null && faceSync != null)
         {
             runner.SetFaceSync(faceSync);
-        }
-
-        _localPoseController = avatar.GetComponent<PoseController>();
-    }
-
-    // プリセットポーズ選択用UIボタンのOnClick()から直接呼べる窓口
-    public void SetLocalPose(int index)
-    {
-        if (_localPoseController != null)
-        {
-            _localPoseController.RequestSetPose(index);
         }
     }
 }
