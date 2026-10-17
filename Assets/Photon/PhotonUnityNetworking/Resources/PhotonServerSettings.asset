@@ -40,6 +40,9 @@ MonoBehaviour:
   - DestroyRpc
   - HeresWhy
   - ApplyPoseRpc
+  - ApplyGestureRpc
+  - ReturnToIdleRpc
+  - ApplyIdleRpc
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

@@ -46,5 +46,13 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         {
             runner.SetFaceSync(faceSync);
         }
+
+        AnimatorController gestureController = avatar.GetComponent<AnimatorController>();
+        GestureUIController gestureUI = FindObjectOfType<GestureUIController>();
+
+        if (gestureUI != null && gestureController != null)
+        {
+            gestureUI.SetTarget(gestureController);
+        }
     }
 }

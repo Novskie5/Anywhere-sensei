@@ -18,7 +18,9 @@ public class FaceSync : MonoBehaviourPun, IPunObservable, IPunInstantiateMagicCa
     [SerializeField] private Vrm10Instance _instance;
     [SerializeField] private Transform _headBone;
 
+    private Animator _animator;
     private Quaternion _targetRotation = Quaternion.identity;
+    private Quaternion _currentHeadRotation = Quaternion.identity;
     private float _blinkL, _blinkR;
     private float _aa, _uu, _ee, _oo; //あいうえお いを実装したときにfloat _iiも追加する　いは笑顔になっちゃうので実装するかは未定
     private float _smile, _surprised, _angry;
@@ -59,13 +61,11 @@ public class FaceSync : MonoBehaviourPun, IPunObservable, IPunInstantiateMagicCa
     {
         if (photonView == null) return;
         _isMine = photonView.IsMine;
+        _animator = GetComponent<Animator>();
     }
 
     private void Update()
     {
-        if (_headBone == null) return;
-        _headBone.localRotation = Quaternion.Slerp(_headBone.localRotation, _targetRotation, 0.1f);
-
         if (_instance == null) return;
         var expression = _instance.Runtime.Expression;
         expression.SetWeight(ExpressionKey.BlinkLeft, _blinkL);
@@ -77,6 +77,15 @@ public class FaceSync : MonoBehaviourPun, IPunObservable, IPunInstantiateMagicCa
         expression.SetWeight(ExpressionKey.Happy, _smile);
         expression.SetWeight(ExpressionKey.Surprised, _surprised);
         expression.SetWeight(ExpressionKey.Angry, _angry);
+    }
+
+    // SetBoneLocalRotationはOnAnimatorIK/OnStateIKの中でしか使えない仕様。
+    // 呼んでもらうにはAnimator Controller側でどこかのレイヤーの「IK Pass」を有効にしておく必要がある
+    private void OnAnimatorIK(int layerIndex)
+    {
+        if (_headBone == null || _animator == null) return;
+        _currentHeadRotation = Quaternion.Slerp(_currentHeadRotation, _targetRotation, 0.1f);
+        _animator.SetBoneLocalRotation(HumanBodyBones.Head, _currentHeadRotation);
     }
 
     // 各種アップデート窓口 (Runnerから呼ばれる)
