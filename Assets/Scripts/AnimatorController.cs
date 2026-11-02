@@ -13,6 +13,8 @@ public class AnimatorController : MonoBehaviourPun
     void Start()
     {
         animator = GetComponent<Animator>();
+        // 立ち位置・向きはコード(AR配置やPhoton)側で決めるので、モーションのルート移動で動かさない
+        animator.applyRootMotion = false;
         StartCoroutine(RandomIdleTrigger());
     }
 
