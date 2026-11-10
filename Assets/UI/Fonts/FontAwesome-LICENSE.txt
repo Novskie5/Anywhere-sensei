@@ -1,0 +1,6 @@
+Font Awesome Free 5 (Solid) - https://fontawesome.com
+Copied from Assets/MediaPipeUnity/Samples/External/FontAwesome so the app UI does not depend on the MediaPipe sample folder.
+
+Font Awesome Free License: https://fontawesome.com/license/free
+- Icons: CC BY 4.0
+- Fonts: SIL OFL 1.1

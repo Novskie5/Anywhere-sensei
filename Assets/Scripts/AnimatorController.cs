@@ -9,6 +9,9 @@ public class AnimatorController : MonoBehaviourPun
     string[] idleTriggers = {"Idle1", "Idle2", "Idle3"};
     string[] gestureTriggers = {"Clapping", "Bye", "Cute"};
     bool isIdle = true;
+
+    // ジェスチャー再生中のボタンを光らせるのに使う(GestureUIController参照)
+    public bool IsIdle => isIdle;
     // Start is called before the first frame update
     void Start()
     {
