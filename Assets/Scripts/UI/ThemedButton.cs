@@ -65,6 +65,8 @@ public class ThemedButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
         if (_image == null) _image = GetComponent<Image>();
 
         // ColorTintはImage.colorに掛け算されるので、Image側は白にしておき色はColorBlockだけで決める
+        _image.sprite = _theme.RoundedSprite;
+        _image.type = Image.Type.Sliced;
         _image.color = Color.white;
         Color fill = FillColor();
         ColorBlock colors = _button.colors;
