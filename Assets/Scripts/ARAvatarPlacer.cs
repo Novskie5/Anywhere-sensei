@@ -52,6 +52,11 @@ public class ARAvatarPlacer : MonoBehaviour
     private ARPlane _dragPlane;
     private float _lastTapTime = -1f;
 
+    // 画面の案内文(PlacementHintView)が今どの段階かを見るためのもの
+    public bool HasFloorCandidate => _hasCandidate;
+    public bool IsPlaced => _placed;
+    public bool HasHostAvatar => _hostAvatar != null;
+
     private void Awake()
     {
         if (_raycastManager == null) _raycastManager = GetComponent<ARRaycastManager>();
