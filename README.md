@@ -27,27 +27,35 @@ Webカメラだけで先生の表情・頭の動きをリアルタイムにト�
 
 ## アーキテクチャ
 
-```
-[PC / Webcam]  Main_Tracking.unity                 [Android / ARCore]  Student_AR.unity
+```mermaid
+flowchart LR
+    subgraph PC["先生 PC (Main_Tracking)"]
+        Cam["Webカメラ"] --> MP["MediaPipe<br/>顔ランドマーク"]
+        MP --> FS["FaceSync<br/>表情・まばたき・頭の回転"]
+        Btn["ジェスチャーボタン"] --> AC["AnimatorController<br/>腕・手のモーション"]
+        FS --> Teacher["先生のVRMアバター"]
+        AC --> Teacher
+    end
 
- MediaPipe (顔ランドマーク)                           ARAvatarPlacer.cs
-      │                                               (床の検出・輪・タップ配置・ARAnchor・
-      ▼                                                ドラッグ/ピンチ操作)
- FaceSync.cs ───────────┐                                   ▲
- (表情/まばたき/頭部回転)  │                                   │ 先生のアバターを渡す
- PoseController.cs       │      ┌──────────────────┐        │
- (呼吸ゆらぎ)              ├──────│   Photon Room    │──── StudentARManager.cs
- AnimatorController.cs   │      │  hostActorNr で   │      (自分のロボットを生成・
- (ジェスチャー, RPC)  ◄────┤      │  先生を特定        │       先生のアバターを特定)
-      ▲                  │      └──────────────────┘             │
- GestureUIController.cs  │               ▲                        ▼
- (ボタン → ジェスチャー)    │               │                  StudentRobot.cs
-                         └── Photon Voice ┴────────────────  (先生の周りの席に浮遊・
-                            (VoiceMuteController.cs)          喋ると光る)
+    subgraph Cloud["Photon Cloud (jpリージョン)"]
+        Room[("Room<br/>hostActorNr = 先生")]
+        Voice(("Photon Voice"))
+    end
 
- UI: UITheme (デザイントークン) ─► ThemedButton / ThemedText / ThemedImage
-     Editor/UIBuilder.cs がテーマから両シーンのCanvasを組み立てる
+    subgraph Phone["生徒 スマホ (Student_AR)"]
+        SAM["StudentARManager<br/>どれが先生か特定"] --> AP["ARAvatarPlacer<br/>床に配置・移動・拡大縮小"]
+        Robot["StudentRobot<br/>先生の周りに浮かぶ"]
+    end
+
+    Teacher -- "表情・頭の回転<br/>(毎フレーム同期)" --> Room
+    AC -- "ジェスチャー (RPC)" --> Room
+    Room -- "先生のアバター" --> SAM
+    Room -- "入室者リスト<br/>(席を計算)" --> Robot
+    PC <-- "音声" --> Voice
+    Voice <-- "音声" --> Phone
 ```
+
+UIはどちらの画面も、テーマアセット (`UITheme`) をもとにエディタ拡張 (`Editor/UIBuilder.cs`) がCanvasを組み立てる。
 
 ## 技術的な見どころ
 
@@ -85,6 +93,6 @@ Webカメラだけで先生の表情・頭の動きをリアルタイムにト�
 
 ## 今後やりたいこと
 
-- Mixamoモーションの追加によるジェスチャーの拡充
+- Mixamoモーションの追加によるジェスチャーの拡充、モーションをリッチに
 - 手・腕のトラッキング(MediaPipeで一度試作したが見送り、現在はボタンからのジェスチャーで代替)
 - 生徒側から先生へのリアクション(挙手・拍手など)
