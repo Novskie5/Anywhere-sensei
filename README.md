@@ -9,8 +9,12 @@ AIを活用して開発しています。
 
 ## デモ
 
-<!-- TODO: ホスト側(PC)とAR側(スマホ)を並べた動画をここに貼る
-     GitHubのWeb上でREADMEを編集し、mp4をドラッグ&ドロップすると https://github.com/user-attachments/assets/... のURLが入り、その場で再生できるプレイヤーになる -->
+
+
+https://github.com/user-attachments/assets/f28db377-0aa9-4813-a579-acfdd0134cca
+PC（先生）側とスマホ（生徒・AR）側を並べたデモ動画です。両側は別々に収録したため映像同士のタイミングは同期していませんが、実際の接続では顔の動き・ジェスチャー・音声がリアルタイムで同期します。
+
+
 
 ## できること
 
